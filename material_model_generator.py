@@ -103,10 +103,17 @@ def plotar(material, A, B, n, sigy, sigu, ymod, offset, epsu):
     """
     Plot the true and engineering stress–strain curves using the Johnson-Cook model.
 
+    This function generates a plot comparing the engineering and true stress–strain
+    responses of a material described by the Johnson-Cook model. It uses the model
+    parameters A, B, n to calculate the true stress from transformed strain values,
+    and derives the engineering stress accordingly. The yield and ultimate strengths
+    are displayed as horizontal reference lines with annotations, and the final point
+    of the true curve is marked with a labeled crosshair.
+
     Parameters
     ----------
     material : str
-        Material name.
+        Name of the material to be shown in the plot title.
     A : float
         Johnson-Cook parameter A [MPa].
     B : float
@@ -116,33 +123,57 @@ def plotar(material, A, B, n, sigy, sigu, ymod, offset, epsu):
     sigy : float
         Yield strength [MPa].
     sigu : float
-        Ultimate strength [MPa].
+        Ultimate tensile strength [MPa].
     ymod : float
         Young's modulus [MPa].
     offset : float
-        Yield offset strain.
+        Yield offset strain (e.g., 0.002 for 0.2% offset).
     epsu : float
-        Ultimate strain.
+        True strain at rupture (maximum true strain).
 
     Returns
     -------
-    strains : ndarray
-        Array of strain values.
+    strains_eng : ndarray
+        Array of engineering strain values.
     stresses_eng : ndarray
-        Array of engineering stress values.
+        Array of engineering stress values computed from the Johnson-Cook true stress.
     """
-    strains = np.linspace(0, epsu, 300)
-    valid = np.log(1 + strains) - sigy * (1 + strains) / ymod
-    valid[valid <= 0] = np.nan
+    import numpy as np
+    import matplotlib.pyplot as plt
 
-    stresses_true = A + B * np.power(valid, n)
-    stresses_eng = stresses_true / (1 + strains)
+    strains_eng_full = np.linspace(0, epsu, 1000)
+    log_valid = np.log(1 + strains_eng_full) - sigy * (1 + strains_eng_full) / ymod
 
-    plt.figure(figsize=(9, 5))
-    plt.plot(strains, stresses_eng, 'r--', label='Stress–Strain Engineering')
-    plt.plot(strains, stresses_true, 'm-', label='Stress–Strain True')
-    plt.axhline(y=sigy, color='b', linestyle='--', linewidth=0.8, label='Yield Strength')
-    plt.axhline(y=sigu, color='b', linestyle=':', linewidth=0.8, label='Ultimate Strength')
+    mask_valid = log_valid > 0
+    strains_eng_valid = strains_eng_full[mask_valid]
+    log_valid_valid = log_valid[mask_valid]
+
+    stresses_true_valid = A + B * np.power(log_valid_valid, n)
+    stresses_eng_valid = stresses_true_valid / (1 + strains_eng_valid)
+    strains_true_valid = np.log(1 + strains_eng_valid)
+
+    strains_eng = np.insert(strains_eng_valid, 0, 0.0)
+    stresses_eng = np.insert(stresses_eng_valid, 0, 0.0)
+    strains_true = np.insert(strains_true_valid, 0, 0.0)
+    stresses_true = np.insert(stresses_true_valid, 0, 0.0)
+
+    strain_u = strains_true[-1]
+    stress_u = stresses_true[-1]
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(strains_eng, stresses_eng, 'k--', linewidth=1.2, label='Stress–Strain Engineering')
+    plt.plot(strains_true, stresses_true, 'k-', linewidth=1.5, label='Stress–Strain True')
+
+    plt.axhline(y=sigy, color='gray', linestyle='--', linewidth=1, label='Yield Strength')
+    plt.axhline(y=sigu, color='gray', linestyle=':', linewidth=1, label='Ultimate Strength')
+    plt.text(epsu * 0.99, sigy + 5, f'{sigy:.1f} MPa', ha='right', va='bottom', fontsize=9, color='gray')
+    plt.text(epsu * 0.99, sigu + 5, f'{sigu:.1f} MPa', ha='right', va='bottom', fontsize=9, color='gray')
+
+    plt.axvline(x=strain_u, color='black', linestyle=':', linewidth=1)
+    plt.axhline(y=stress_u, color='black', linestyle=':', linewidth=1)
+    plt.text(strain_u + 0.002, stress_u, f"εu = {strain_u:.4f}\nσu = {stress_u:.1f} MPa",
+             va='center', ha='left', fontsize=9,
+             bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="gray", lw=0.5))
 
     plt.title(f'Material: {material}', fontsize=12)
     plt.xlabel('Strain')
@@ -152,7 +183,7 @@ def plotar(material, A, B, n, sigy, sigu, ymod, offset, epsu):
     plt.tight_layout()
     plt.show()
 
-    return strains, stresses_eng
+    return strains_eng, stresses_eng
 
 def exportar_inp_jc(nome, material, density, ymod, nu, A, B, n):
     """
