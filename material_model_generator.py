@@ -133,7 +133,7 @@ def plotar_JC(material, A, B, n, sigy, sigu, ymod, offset, epsu, save=False):
     epsu : float
         True strain at rupture (maximum true strain).
     save : bool, optional
-        If True, saves the plot as a PNG file without displaying it.
+        If True, saves the plot as a SVG file without displaying it.
     
     Returns
     -------
@@ -187,7 +187,7 @@ def plotar_JC(material, A, B, n, sigy, sigu, ymod, offset, epsu, save=False):
     fig.tight_layout()
 
     if save:
-        fig.savefig(f"{material.replace(' ', '_')}_JC.png", dpi=300)
+        fig.savefig(f"{material.replace(' ', '_')}_JC.svg")
         plt.close(fig)
     else:
         plt.show()
@@ -216,7 +216,7 @@ def plotar_tabular(material, sigy, sigu, ymod, offset, epsu, npts=300, save=Fals
     npts : int, optional
         Number of strain points to generate. Default is 300.
     save : bool, optional
-        If True, saves the plot as a PNG file without displaying it.
+        If True, saves the plot as a SVG file without displaying it.
     """
     eps_yield = offset + sigy / ymod
     eps_rupt = epsu
@@ -263,7 +263,7 @@ def plotar_tabular(material, sigy, sigu, ymod, offset, epsu, npts=300, save=Fals
     fig.tight_layout()
 
     if save:
-        fig.savefig(f"{material.replace(' ', '_')}_TABULAR.png", dpi=300)
+        fig.savefig(f"{material.replace(' ', '_')}_TABULAR.svg")
         plt.close(fig)
     else:
         plt.show()
@@ -364,7 +364,7 @@ def exportar_inp_tabular(nome, material, density, ymod, nu, sigy, sigu, offset, 
 def run_batch_mode():
     """
     Executes batch processing of materials using input from 'material_data.csv'.
-    Automatically generates .inp material cards and PNG plots for each entry.
+    Automatically generates .inp material cards and SVG plots for each entry.
 
     Returns
     -------
@@ -476,7 +476,7 @@ def main():
             print("Both Johnson-Cook and Tabular material cards exported successfully.")
 
         # Export plots
-        save_plots = input("\nDo you want to save the plots as PNG? (y/n): ").strip().lower()
+        save_plots = input("\nDo you want to save the plots as SVG? (y/n): ").strip().lower()
         if save_plots == 'y':
             plotar_JC(material, A, B, n, sigy, sigu, ymod, offset, epsu, save=True)
             plotar_tabular(material, sigy, sigu, ymod, offset, epsu, save=True)
