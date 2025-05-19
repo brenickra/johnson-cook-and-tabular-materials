@@ -51,7 +51,7 @@ Then run the script and select batch mode. It will automatically:
 
 * Calculate Johnson–Cook and tabular models
 * Export `.inp` files
-* Save the plots as PNG files (no visualizer opened)
+* Save the plots as SVG files (no visualizer opened)
 
 ## Output Example
 
@@ -80,7 +80,7 @@ Then run the script and select batch mode. It will automatically:
 ## Notes
 
 * All images and material cards are saved in the same directory as the script
-* Plot files are named using the pattern `<material_name>_JC.png` and `<material_name>_TABULAR.png`
+* Plot files are named using the pattern `<material_name>_JC.svg` and `<material_name>_TABULAR.svg`
 
 ## License
 
